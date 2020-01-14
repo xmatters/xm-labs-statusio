@@ -18,9 +18,9 @@ This integration is intended to be added to an existing workflow that is trigger
 The logic of the workflow is expected to follow something like the following:
 
 1. Inbound trigger fires, providing the following information:
-- the component that is affected by the trigger
-- the severity of the problem
-- (optional) a description of the problem for internal consumption (e.g. a Jira ticket for IT Support)
+   - the component that is affected by the trigger
+   - the severity of the problem
+   - (optional) a description of the problem for internal consumption (e.g. a Jira ticket for IT Support)
 
 2. If the trigger indicates an alarm status, the first step used is `Status.io component in maintenance?` in order to decide whether or not an incident should be created.
 
@@ -52,11 +52,11 @@ The following image shows an example complete workflow that started from the Clo
 7. Click on `Add Constant`. Set the name to `Status.io API Key` and set the value to the API Key previously noted. Click on `Save Changes`.
 8. Click on `Edit Endpoints`.
 9. If there isn't already an endpoint called `Status.io`, follow these steps:
-  * Click on `Add Endpoint`.
-  * Set the name to `Status.io`.
-  * Set the base URL to `https://api.status.io`.
-  * Set the authentication type to `None`.
-  * Click on `Save Changes`.
+   * Click on `Add Endpoint`.
+   * Set the name to `Status.io`.
+   * Set the base URL to `https://api.status.io`.
+   * Set the authentication type to `None`.
+   * Click on `Save Changes`.
 
 ## Adding the integration
 To add the integration to your workflow, follow these steps:
