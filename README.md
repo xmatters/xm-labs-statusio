@@ -1,6 +1,8 @@
 # Status.io Outbound (from xMatters) Integration
 With this Outbound Integration, components on Status.io affected by one or more xMatters events have incidents created for them unless they are in an active maintenance window. When the last xMatters event affecting a component has been terminated, the incident for the component is updated to show that the component is now healthy again but being monitored.
 
+The concept behind this integration is to allow the Status.io dashboard to be updated automatically from events happening on xMatters.
+
 <kbd>
   <a href="https://support.xmatters.com/hc/en-us/community/topics"><img src="https://github.com/xmatters/xMatters-Labs/raw/master/media/disclaimer.png"></a>
 </kbd>
@@ -75,6 +77,19 @@ A custom step can then parse that string, divide it into the appropriate parts a
    - Set the authentication type to `None`.
    - Click on `Save Changes`.
 
+7. In the workflow, click on the `Properties` tab.
+   - Click on `Create Property`.
+   - Click on `Text` then click on `Next`.
+   - Enter `AffectedComponent` as the name.
+   - Change the `Maximum Size` to 256 characters.
+   - Click on `Create Property`.
+
+8. In the workflow, click on the `Forms` tab.
+   - Against the form used to notify agents when an alarm has occurred, click on `Edit` > `Layout`.
+   - Drag `AffectedComponent` from the `Properties` list on the right-hand side into the `Custom Section`.
+   - Click on `Save Changes`.
+
+
 ## Adding the integration
 To add the integration to your workflow, follow these steps:
 
@@ -103,11 +118,34 @@ To add the integration to your workflow, follow these steps:
        - Set the `Status code` to the output from `Status.io: status mapper> Status.io status`
        - In each of the `Notify` fields, set the string to `1` if you want Status.io to use that notification channel/mechanism.
 
+3. In the part of the workflow that handles an alarm being cleared, **before** the step that terminates events, do the following:
+   - Add a `Get Events` step from the `Tools` section.
+     - Set the `Step Label` to `Get ACTIVE Events for Affected Component`.
+     - Set `Status` to `ACTIVE`.
+     - Set `Property Name` to `AffectedComponent#en`.
+     - Set the `Property Value` field to the Component value from step #1.
+     - Set `Exact Property Value Match` to `TRUE`.
+     - Click `OK`.
+   - Add a `Status.io: update incident` step and connect it to the output from the `Get Events` step.
+     - Set the `Status.io Component` field to the Component value from step #1.
+     - Set the `xMatters Event Count` field to the `Get ACTIVE Events for Affected Component > Total Event Count` value.
+     - Set the `Status.io Page ID` field to the Page ID constant.
+     - Set the `Status.io API ID` field to the API ID constant.
+     - Set the `Status.io API Key` field to the API Key constant.
+     - Set `New incident state` to an appropriate value, typically 300 which means monitoring. Alternatively, use 200 which means that the problem has been identified.
+     - Set `Update message` to an appropriate message to show on the incident.
+     - In each of the `Notify` fields, set the string to `1` if you want Status.io to use that notification channel/mechanism.
+   - Connect the output from the `Update Incident` step to the input of the `Terminate Events` step.
+
 # Testing
-Be specific. What should happen to make sure this code works? What would a user expect to see? 
+Testing your workflow will require the triggering of alarms and then clearing them again. When the first alarm for a given component triggers the workflow, you should see an incident appearing in the Status.io dashboard for that component. Subsequent alarms for the same component should not create additional incidents but, if they have a higher severity than earlier alarms, the incident will be updated to reflect that.
+
+When clearing the alarms, only the last alarm to be cleared for the component should result in the incident being updated. The incident should show that the component is now considered to be operational and you should see the state and message defined in step #3 above.
 
 # Troubleshooting
-Optional section for how to troubleshoot. Especially anything in the source application that an xMatters developer might not know about, or specific areas in xMatters to look for details - like the Activity Stream? 
+One of the best ways to troubleshoot the workflow steps is to use the `Activity` button in the top right corner of the Workflow Designer. When you click on that, the Activity pane appears in the bottom part of the Designer. If the `Logging` option is not turned on, turn it on and then try to reproduce the problem. Once you've done that, click on the name in the Activity pane to look at the logs.
+
+When you click on a request, xMatters highlights the steps that have been executed. You can click on individual steps to look at the inputs, parameters, headers, body and outputs. If checking each of those steps doesn't show what is going wrong, the next thing to look at is the `Log` tab. In addition to the HTTP traffic between xMatters and external systems, the various Status.io steps themselves also emit additional logging information to show what is being done.
 
 # Known Issues
 There is a race condition opportunity when multiple alarms go off for the same component within a narrow time window. If this happens, multiple incidents can be created for the same component. When the alarms get cleared, only one of the incidents will get updated (the first one that was created).
