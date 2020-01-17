@@ -12,7 +12,15 @@ The concept behind this integration is to allow the Status.io dashboard to be up
 * xMatters account - If you don't have one, [get one](https://www.xmatters.com)!
 
 # Files
-* [StatusioIntegration.zip](StatusioIntegration.zip) - This is an example workflow. Note that it does not include any inbound integration to trigger the creation of an xMatters event.
+* [StatusioSteps.zip](StatusioSteps.zip) - This is an example workflow. Note that it does not include any inbound integration to trigger the creation of an xMatters event.
+
+# Included Custom Steps
+
+The attached [StatusioSteps.zip](StatusioSteps.zip) file contains the custom steps for use in other Workflows. The steps included:
+
+<kbd>
+  <img src="/media/customsteps.png">
+</kbd>
 
 # How it works
 This integration is intended to be added to an existing workflow that is triggered when there is a problem and when that problem has been resolved, e.g. the AWS CloudWatch Integration.
